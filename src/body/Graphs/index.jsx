@@ -4,25 +4,26 @@ import { Container, List, ListItem, Stack } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
 import TemperatureChart from './TemperatureChart';
-import DefineChart from './DefineChart'
+import DefineChart from './DefineChart';
+import createSaleDataToChart from './Logic';
 
 const backEndUrl = import.meta.env.VITE_API_URL_BACK_END_URL
 
 const userName = 'lizCafeteria';
 const listOfGraphs = [1];
 const fakeData = [
-  { month: 'Jan', temperature: 30 },
-  { month: 'Feb', temperature: 32 },
-  { month: 'Mar', temperature: 35 },
-  { month: 'Apr', temperature: 40 },
-  { month: 'May', temperature: 45 },
-  { month: 'Jun', temperature: 50 },
-  { month: 'Jul', temperature: 55 },
-  { month: 'Aug', temperature: 53 },
-  { month: 'Sep', temperature: 48 },
-  { month: 'Oct', temperature: 42 },
-  { month: 'Nov', temperature: 36 },
-  { month: 'Dec', temperature: 32 },
+  { XAxisData: 'Jan', lineData: 30 },
+  { XAxisData: 'Feb', lineData: 32 },
+  { XAxisData: 'Mar', lineData: 35 },
+  { XAxisData: 'Apr', lineData: 40 },
+  { XAxisData: 'May', lineData: 45 },
+  { XAxisData: 'Jun', lineData: 50 },
+  { XAxisData: 'Jul', lineData: 55 },
+  { XAxisData: 'Aug', lineData: 53 },
+  { XAxisData: 'Sep', lineData: 48 },
+  { XAxisData: 'Oct', lineData: 42 },
+  { XAxisData: 'Nov', lineData: 36 },
+  { XAxisData: 'Dec', lineData: 32 },
 ];
 
 const Graphs = () => {
@@ -48,8 +49,6 @@ const Graphs = () => {
   }, []);
 
   const handleAddChart = async (dataForNewChart) => {
-    setDataForChart(dataForChart => [...dataForChart, fakeData]);
-
     const query = {
       ...(dataForNewChart.subject.type === 'byProduct' && { products: dataForNewChart.subject.products }),
       ...(dataForNewChart.subject.type === 'byCategory' && { categories: dataForNewChart.subject.categories }),
@@ -57,15 +56,18 @@ const Graphs = () => {
       endTime: dataForNewChart.relevantTime.end,
     };
 
-    console.log(dataForNewChart);
-
     const { data } = await Axios.get(`${backEndUrl}/getSales`, {
       params: {
         query: JSON.stringify(query),
       },
     });
 
-    console.log(data);
+    console.log(dataForNewChart, data);
+
+    const newChartData = createSaleDataToChart(dataForNewChart, data);
+
+    console.log(newChartData);
+    setDataForChart(dataForChart => [...dataForChart, newChartData]);
   };
 
   return (
