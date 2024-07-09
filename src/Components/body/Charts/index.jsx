@@ -56,20 +56,18 @@ const ChartManagement = () => {
   }, []);
 
   const handleAddChart = async (dataForNewChart) => {
-    const query = {
-      ...(dataForNewChart.subject.type === 'byProduct' && { products: dataForNewChart.subject.products }),
-      ...(dataForNewChart.subject.type === 'byCategory' && { categories: dataForNewChart.subject.categories }),
-      startTime: dataForNewChart.relevantTime.start,
-      endTime: dataForNewChart.relevantTime.end,
-    };
+    // const query = {
+    //   ...(dataForNewChart.subject.type === 'byProduct' && { products: dataForNewChart.subject.products }),
+    //   ...(dataForNewChart.subject.type === 'byCategory' && { categories: dataForNewChart.subject.categories }),
+    //   startTime: dataForNewChart.relevantTime.start,
+    //   endTime: dataForNewChart.relevantTime.end,
+    // };
 
     const { data } = await Axios.get(`${backEndUrl}/getSales`, {
       params: {
-        query: JSON.stringify(query),
+        query: JSON.stringify(dataForNewChart),
       },
     });
-
-    // console.log(dataForNewChart, data);
 
     const newChartData = {
       info: {
