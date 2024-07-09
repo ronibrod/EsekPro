@@ -19,6 +19,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { XAxis, YAxis } from 'recharts';
+import _range from 'lodash/range';
+import Colors from '../../../helpers/colors';
 
 const subjectMenu = {
   label: 'נושא',
@@ -56,13 +58,14 @@ const XAxisGroupsMenu = {
   label: 'קבוצות ציר ה - X',
   isMultiple: false,
   listOfOptions: {
-    byFrequency: 'לפי תדירות',
-    byAverage: 'לפי ממוצע סטטיסטי',
-    bySmartAverage: 'לפי ממוצע חכם',
+    bySequence: 'רצף זמן (כל יום)',
+    byCertain: 'זמן מסויים (רק ימי חמישי)',
+    byPeriod: 'פרק זמן (ימי השבוע)',
+    // byCertainBySmart: 'זמן מסויים ממוצע חכם',
   },
 };
 
-const XAxisTimeRelationsMenu = {
+const XAxisSequenceTimeMenu = {
   label: 'יחסי זמן ציר ה - X',
   isMultiple: false,
   listOfOptions: {
@@ -71,6 +74,26 @@ const XAxisTimeRelationsMenu = {
     weekly: 'שבועי',
     monthly: 'חודשי',
     yearly: 'שנתי',
+  },
+};
+
+const XAxisCertainTimeMenu = {
+  label: 'יחסי זמן ציר ה - X',
+  isMultiple: false,
+  listOfOptions: {
+    hours: 'שעות',
+    days: 'ימים',
+    months: 'חודשים',
+  },
+};
+
+const XAxisPeriodTimeMenu = {
+  label: 'פרק זמן ציר ה - X',
+  isMultiple: true,
+  listOfOptions: {
+    hours: [..._range(1, 24), 0],
+    days: _range(1, 8),
+    months: _range(1, 13),
   },
 };
 
@@ -87,18 +110,19 @@ const DefineChart = ({ onSubmit, existProducts }) => {
   const [isAddNewChartOpen, setIsAddNewChartOpen] = useState(false);
   const [categoryMenu, setCategoryMenu] = useState([]);
   const [productMenu, setProductMenu] = useState([]);
-  const [selectedSubject, setSelectedSubject] = useState([]);
+  const [selectedSubject, setSelectedSubject] = useState('allProducts');
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [selectedXAxisGroups, setSelectedXAxisGroups] = useState([]);
-  const [selectedXAxisTimeRelations, setSelectedXAxisTimeRelations] = useState([]);
+  const [selectedXAxisGroups, setSelectedXAxisGroups] = useState('bySequence');
+  const [selectedXAxisSequenceTime, setSelectedXAxisSequenceTime] = useState('daily');
+  const [selectedXAxisCertainTime, setSelectedXAxisCertainTime] = useState('days');
+  const [selectedXAxisPeriodTime, setSelectedXAxisPeriodTime] = useState([]);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [selectedYAxis, setSelectedYAxis] = useState([]);
+  const [selectedYAxis, setSelectedYAxis] = useState('amountOfSalse');
   const [selectedComparedToSubject, setSelectedComparedToSubject] = useState([]);
   const [selectedComparedToProducts, setSelectedComparedToProducts] = useState([]);
   const [selectedComparedToCategories, setSelectedComparedToCategories] = useState([]);
-
   useEffect(() => {
     const categories = [], products = [];
 
@@ -132,13 +156,15 @@ const DefineChart = ({ onSubmit, existProducts }) => {
   const handleRun = () => {
     const dataForNewChart = {
       subject: {
-        type: selectedSubject[0],
-        ...(selectedSubject[0] === 'byProduct' && { products: selectedProducts.map(product => product.name) }),
-        ...(selectedSubject[0] === 'byCategory' && { categories: selectedCategories.map(category => category.name) }),
+        type: selectedSubject,
+        ...(selectedSubject === 'byProduct' && { products: selectedProducts.map(product => product.name) }),
+        ...(selectedSubject === 'byCategory' && { categories: selectedCategories.map(category => category.name) }),
       },
       XAxis: {
-        type: selectedXAxisGroups[0],
-        timeRelations: selectedXAxisTimeRelations[0],
+        type: selectedXAxisGroups,
+        ...(selectedXAxisGroups === 'bySequence' && { timeRelations: selectedXAxisSequenceTime }),
+        ...(['byCertain', 'byPeriod'].includes(selectedXAxisGroups) && { timeDivision: selectedXAxisCertainTime }),
+        ...(selectedXAxisGroups === 'byPeriod' && { relevantPeriod: selectedXAxisPeriodTime }),
       },
       YAxis: {
         type: selectedYAxis[0],
@@ -161,12 +187,7 @@ const DefineChart = ({ onSubmit, existProducts }) => {
   };
 
   const handleChangeSelectedSubject = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setSelectedSubject(
-      typeof value === 'string' ? value.split(',') : value,
-    );
+    setSelectedSubject(event.target.value);
   };
 
   const handleChangeSelectedProducts = (event) => {
@@ -188,30 +209,29 @@ const DefineChart = ({ onSubmit, existProducts }) => {
   };
 
   const handleChangeSelectedXAxisGroups = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setSelectedXAxisGroups(
-      typeof value === 'string' ? value.split(',') : value,
-    );
+    setSelectedXAxisGroups(event.target.value);
   };
 
-  const handleChangeSelectedXAxisTimeRelations = (event) => {
+  const handleChangeSelectedXAxisSequenceTime = (event) => {
+    setSelectedXAxisSequenceTime(event.target.value);
+  };
+
+  const handleChangeSelectedXAxisCertainTime = (event) => {
+    setSelectedXAxisCertainTime(event.target.value);
+    setSelectedXAxisPeriodTime([]);
+  };
+
+  const handleChangeSelectedXAxisPeriodTime = (event) => {
     const {
       target: { value },
     } = event;
-    setSelectedXAxisTimeRelations(
+    setSelectedXAxisPeriodTime(
       typeof value === 'string' ? value.split(',') : value,
     );
   };
 
   const handleChangeSelectedYAxis = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setSelectedYAxis(
-      typeof value === 'string' ? value.split(',') : value,
-    );
+    setSelectedYAxis(event.target.value);
   };
 
   const handleChangeSelectedComparedToSubject = (event) => {
@@ -242,7 +262,15 @@ const DefineChart = ({ onSubmit, existProducts }) => {
   };
 
   return (
-    <Paper sx={{ width: '100%', height: '100%', padding: 4, overflow: 'auto' }}>
+    <Paper
+      sx={{
+        width: '100%',
+        height: '100%',
+        padding: 4,
+        overflowY: 'auto',
+        bgcolor: Colors[0],
+      }}
+    >
       <Typography variant='h6'>
         יצירת גרף
       </Typography>
@@ -250,7 +278,7 @@ const DefineChart = ({ onSubmit, existProducts }) => {
       {
         !isAddNewChartOpen &&
         <Stack sx={{ mt: '25%', justifyContent: 'center', alignItems: 'center' }}>
-          <Stack onClick={() => setIsAddNewChartOpen(true)} sx={{ height: 100, width: 100, bgcolor: grey[200] }}>
+          <Stack onClick={() => setIsAddNewChartOpen(true)} sx={{ height: 100, width: 100, bgcolor: Colors[1] }}>
             <AddIcon style={{ fontSize: 100 }} />
           </Stack>
         </Stack>
@@ -258,166 +286,181 @@ const DefineChart = ({ onSubmit, existProducts }) => {
 
       {
         isAddNewChartOpen &&
-        <Stack sx={{ justifyContent: 'center', alignItems: 'center' }}>
+        <Stack sx={{ justifyContent: 'center', alignItems: 'center', gap: 5 }}>
           <CloseIcon onClick={() => setIsAddNewChartOpen(false)} />
 
-          <FormControl sx={{ m: 1, width: 300 }}>
-            <InputLabel>{subjectMenu.label}</InputLabel>
-            <Select
-              multiple={subjectMenu.isMultiple}
-              value={selectedSubject}
-              onChange={handleChangeSelectedSubject}
-              input={<OutlinedInput label='subject' />}
-              renderValue={(selectedSubject) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selectedSubject.map((value) => (
-                    <Chip key={value} label={subjectMenu.listOfOptions[value]} />
-                  ))}
-                </Box>
-              )}
-            // MenuProps={MenuProps}
-            >
-              {
-                Object.entries(subjectMenu.listOfOptions).map(([key, value]) => (
-                  <MenuItem
-                    key={key}
-                    value={key}
-                  // style={getStyles(name, personName, theme)}
-                  >
-                    {value}
-                  </MenuItem>
-                ))
-              }
-            </Select>
-          </FormControl>
-
-          {
-            selectedSubject.includes('byProduct') &&
-            <FormControl sx={{ m: 1, width: 300 }}>
-              <InputLabel>{productMenu.label}</InputLabel>
+          <Stack direction='row'>
+            <FormControl sx={{ m: 1, width: 200, minWidth: 100 }}>
+              <InputLabel>{subjectMenu.label}</InputLabel>
               <Select
-                multiple={productMenu.isMultiple}
-                value={selectedProducts}
-                onChange={handleChangeSelectedProducts}
-                input={<OutlinedInput label='subject' />}
-                renderValue={(selectedProducts) => (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {selectedProducts.map((product) => (
-                      <Chip key={product.name} label={product.hebrewNeme} />
-                    ))}
-                  </Box>
-                )}
-              // MenuProps={MenuProps}
+                id='subject'
+                value={selectedSubject}
+                label='subject'
+                onChange={handleChangeSelectedSubject}
+                sx={{ bgcolor: Colors[1] }}
               >
                 {
-                  productMenu.listOfOptions.map(option => (
-                    <MenuItem
-                      key={option.name}
-                      value={option}
-                    // style={getStyles(name, personName, theme)}
-                    >
-                      {option.hebrewNeme}
+                  Object.entries(subjectMenu.listOfOptions).map(([key, value]) => (
+                    <MenuItem key={key} value={key}>{value}</MenuItem>
+                  ))
+                }
+              </Select>
+            </FormControl>
+
+            {
+              selectedSubject.includes('byProduct') &&
+              <FormControl sx={{ m: 1, width: 'auto', minWidth: 200, maxWidth: 400 }}>
+                <InputLabel>{productMenu.label}</InputLabel>
+                <Select
+                  sx={{ bgcolor: Colors[1] }}
+                  multiple={productMenu.isMultiple}
+                  value={selectedProducts}
+                  onChange={handleChangeSelectedProducts}
+                  input={<OutlinedInput label='product' />}
+                  renderValue={(selectedProducts) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, overflow: 'auto', maxHeight: 80 }}>
+                      {selectedProducts.map((product) => (
+                        <Chip key={product.name} label={product.hebrewNeme} sx={{ bgcolor: Colors[2] }} />
+                      ))}
+                    </Box>
+                  )}
+                >
+                  {
+                    productMenu.listOfOptions.map(option => (
+                      <MenuItem key={option.name} value={option}>
+                        {option.hebrewNeme}
+                      </MenuItem>
+                    ))
+                  }
+                </Select>
+              </FormControl>
+            }
+
+            {
+              selectedSubject.includes('byCategory') &&
+              <FormControl sx={{ m: 1, width: 'auto', minWidth: 200, maxWidth: 400 }}>
+                <InputLabel>{categoryMenu.label}</InputLabel>
+                <Select
+                  sx={{ bgcolor: Colors[1] }}
+                  multiple={categoryMenu.isMultiple}
+                  value={selectedCategories}
+                  onChange={handleChangeSelectedCategories}
+                  input={<OutlinedInput label='category' />}
+                  renderValue={(selectedCategories) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, overflow: 'auto', maxHeight: 80 }}>
+                      {selectedCategories.map(category => (
+                        <Chip key={category.name} label={category.hebrewNeme} sx={{ bgcolor: Colors[2] }} />
+                      ))}
+                    </Box>
+                  )}
+                >
+                  {
+                    categoryMenu.listOfOptions.map(category => (
+                      <MenuItem key={category.name} value={category}>
+                        {category.hebrewNeme}
+                      </MenuItem>
+                    ))
+                  }
+                </Select>
+              </FormControl>
+            }
+          </Stack>
+
+          <Stack direction='row'>
+            <FormControl sx={{ m: 1, width: 200, minWidth: 100 }}>
+              <InputLabel>{XAxisGroupsMenu.label}</InputLabel>
+              <Select
+                id='XAxis'
+                value={selectedXAxisGroups}
+                label='XAxis'
+                onChange={handleChangeSelectedXAxisGroups}
+                sx={{ bgcolor: Colors[1] }}
+              >
+                {
+                  Object.entries(XAxisGroupsMenu.listOfOptions).map(([key, value]) => (
+                    <MenuItem key={key} value={key}>
+                      {value}
                     </MenuItem>
                   ))
                 }
               </Select>
             </FormControl>
-          }
 
-          {
-            selectedSubject.includes('byCategory') &&
-            <FormControl sx={{ m: 1, width: 300 }}>
-              <InputLabel>{categoryMenu.label}</InputLabel>
-              <Select
-                multiple={categoryMenu.isMultiple}
-                value={selectedCategories}
-                onChange={handleChangeSelectedCategories}
-                input={<OutlinedInput label='subject' />}
-                renderValue={(selectedCategories) => (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {selectedCategories.map(category => (
-                      <Chip key={category.name} label={category.hebrewNeme} />
-                    ))}
-                  </Box>
-                )}
-              // MenuProps={MenuProps}
-              >
-                {
-                  categoryMenu.listOfOptions.map(category => (
-                    <MenuItem
-                      key={category.name}
-                      value={category}
-                    // style={getStyles(name, personName, theme)}
-                    >
-                      {category.hebrewNeme}
-                    </MenuItem>
-                  ))
-                }
-              </Select>
-            </FormControl>
-          }
+            {
+              selectedXAxisGroups === 'bySequence' &&
+              <FormControl sx={{ m: 1, width: 'auto', minWidth: 200, maxWidth: 400, bgcolor: Colors[1] }}>
+                <InputLabel>{XAxisSequenceTimeMenu.label}</InputLabel>
+                <Select
+                  id='XAxisSequenceTime'
+                  value={selectedXAxisSequenceTime}
+                  label='XAxisSequenceTime'
+                  onChange={handleChangeSelectedXAxisSequenceTime}
+                  sx={{ bgcolor: Colors[1] }}
+                >
+                  {
+                    Object.entries(XAxisSequenceTimeMenu.listOfOptions).map(([key, value]) => (
+                      <MenuItem key={key} value={key}>
+                        {value}
+                      </MenuItem>
+                    ))
+                  }
+                </Select>
+              </FormControl>
+            }
 
-          <FormControl sx={{ m: 1, width: 300 }}>
-            <InputLabel>{XAxisGroupsMenu.label}</InputLabel>
-            <Select
-              multiple={XAxisGroupsMenu.isMultiple}
-              value={selectedXAxisGroups}
-              onChange={handleChangeSelectedXAxisGroups}
-              input={<OutlinedInput label='subject' />}
-              renderValue={(selectedXAxisGroups) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selectedXAxisGroups.map((value) => (
-                    <Chip key={value} label={XAxisGroupsMenu.listOfOptions[value]} />
-                  ))}
-                </Box>
-              )}
-            // MenuProps={MenuProps}
-            >
-              {
-                Object.entries(XAxisGroupsMenu.listOfOptions).map(([key, value]) => (
-                  <MenuItem
-                    key={key}
-                    value={key}
-                  // style={getStyles(name, personName, theme)}
-                  >
-                    {value}
-                  </MenuItem>
-                ))
-              }
-            </Select>
-          </FormControl>
+            {
+              (selectedXAxisGroups === 'byCertain' || selectedXAxisGroups === 'byPeriod') &&
+              <FormControl sx={{ m: 1, width: 200, minWidth: 100 }}>
+                <InputLabel>{XAxisCertainTimeMenu.label}</InputLabel>
+                <Select
+                  id='XAxisCertainTime'
+                  value={selectedXAxisCertainTime}
+                  label='XAxisCertainTime'
+                  onChange={handleChangeSelectedXAxisCertainTime}
+                  sx={{ bgcolor: Colors[1] }}
+                >
+                  {
+                    Object.entries(XAxisCertainTimeMenu.listOfOptions).map(([key, value]) => (
+                      <MenuItem key={key} value={key}>
+                        {value}
+                      </MenuItem>
+                    ))
+                  }
+                </Select>
+              </FormControl>
+            }
 
-          <FormControl sx={{ m: 1, width: 300 }}>
-            <InputLabel>{XAxisTimeRelationsMenu.label}</InputLabel>
-            <Select
-              multiple={XAxisTimeRelationsMenu.isMultiple}
-              value={selectedXAxisTimeRelations}
-              onChange={handleChangeSelectedXAxisTimeRelations}
-              input={<OutlinedInput label='subject' />}
-              renderValue={(selectedXAxisTimeRelations) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selectedXAxisTimeRelations.map((value) => (
-                    <Chip key={value} label={XAxisTimeRelationsMenu.listOfOptions[value]} />
-                  ))}
-                </Box>
-              )}
-            // MenuProps={MenuProps}
-            >
-              {
-                Object.entries(XAxisTimeRelationsMenu.listOfOptions).map(([key, value]) => (
-                  <MenuItem
-                    key={key}
-                    value={key}
-                  // style={getStyles(name, personName, theme)}
-                  >
-                    {value}
-                  </MenuItem>
-                ))
-              }
-            </Select>
-          </FormControl>
+            {
+              (selectedXAxisGroups === 'byCertain' && selectedXAxisCertainTime.length !== 0) &&
+              <FormControl sx={{ m: 1, width: 'auto', minWidth: 200, maxWidth: 250 }}>
+                <InputLabel>{XAxisPeriodTimeMenu.label}</InputLabel>
+                <Select
+                  sx={{ bgcolor: Colors[1] }}
+                  multiple={XAxisPeriodTimeMenu.isMultiple}
+                  value={selectedXAxisPeriodTime}
+                  onChange={handleChangeSelectedXAxisPeriodTime}
+                  input={<OutlinedInput label='subject' />}
+                  renderValue={(selectedXAxisPeriodTime) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, overflow: 'auto', maxHeight: 80 }}>
+                      {selectedXAxisPeriodTime.map((value) => (
+                        <Chip key={value} label={value} />
+                      ))}
+                    </Box>
+                  )}
+                >
+                  {
+                    XAxisPeriodTimeMenu.listOfOptions[selectedXAxisCertainTime].map(value => (
+                      <MenuItem key={value} value={value}>
+                        {value}
+                      </MenuItem>
+                    ))
+                  }
+                </Select>
+              </FormControl>
+            }
+          </Stack>
 
-          <Stack direction='row' spacing={2}>
+          <Stack direction='row' gap={2}>
             <DatePicker
               selected={startDate}
               onChange={(date) => setStartDate(date)}
@@ -425,7 +468,7 @@ const DefineChart = ({ onSubmit, existProducts }) => {
               startDate={startDate}
               endDate={endDate}
               placeholderText="תאריך התחלה"
-              customInput={<TextField sx={{ width: 150 }} />}
+              customInput={<TextField sx={{ bgcolor: Colors[1] }} />}
             />
             <DatePicker
               selected={endDate}
@@ -435,33 +478,22 @@ const DefineChart = ({ onSubmit, existProducts }) => {
               endDate={endDate}
               minDate={startDate}
               placeholderText="תאריך סיום"
-              customInput={<TextField sx={{ width: 150 }} />}
+              customInput={<TextField sx={{ bgcolor: Colors[1] }} />}
             />
           </Stack>
 
           <FormControl sx={{ m: 1, width: 300 }}>
             <InputLabel>{YAxisMenu.label}</InputLabel>
             <Select
-              multiple={YAxisMenu.isMultiple}
+              id='YAxis'
               value={selectedYAxis}
+              label='YAxis'
               onChange={handleChangeSelectedYAxis}
-              input={<OutlinedInput label='subject' />}
-              renderValue={(selectedYAxis) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                  {selectedYAxis.map((value) => (
-                    <Chip key={value} label={YAxisMenu.listOfOptions[value]} />
-                  ))}
-                </Box>
-              )}
-            // MenuProps={MenuProps}
+              sx={{ bgcolor: Colors[1] }}
             >
               {
                 Object.entries(YAxisMenu.listOfOptions).map(([key, value]) => (
-                  <MenuItem
-                    key={key}
-                    value={key}
-                  // style={getStyles(name, personName, theme)}
-                  >
+                  <MenuItem key={key} value={key}>
                     {value}
                   </MenuItem>
                 ))

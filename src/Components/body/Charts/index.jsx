@@ -3,35 +3,42 @@ import React, { useEffect, useState } from 'react';
 import { Container, List, ListItem, Stack } from '@mui/material';
 import { grey } from '@mui/material/colors';
 
-import TemperatureChart from './TemperatureChart';
+import Charts from './Charts';
 import DefineChart from './DefineChart';
 import createSaleDataToChart from './Logic';
 
 const backEndUrl = import.meta.env.VITE_API_URL_BACK_END_URL
 
 const userName = 'lizCafeteria';
-const listOfGraphs = [1];
-const fakeData = [
-  { XAxisData: 'Jan', lineData: 30 },
-  { XAxisData: 'Feb', lineData: 32 },
-  { XAxisData: 'Mar', lineData: 35 },
-  { XAxisData: 'Apr', lineData: 40 },
-  { XAxisData: 'May', lineData: 45 },
-  { XAxisData: 'Jun', lineData: 50 },
-  { XAxisData: 'Jul', lineData: 55 },
-  { XAxisData: 'Aug', lineData: 53 },
-  { XAxisData: 'Sep', lineData: 48 },
-  { XAxisData: 'Oct', lineData: 42 },
-  { XAxisData: 'Nov', lineData: 36 },
-  { XAxisData: 'Dec', lineData: 32 },
-];
+const listOfCharts = [1];
+const fakeData = {
+  info: {
+    chartId: `id_0_${String(new Date())}`,
+    name: 'טמפרטורה',
+    lineTitle: ['T'],
+  },
+  chartData: [
+    { XAxisData: 'Jan', lineData: 30 },
+    { XAxisData: 'Feb', lineData: 32 },
+    { XAxisData: 'Mar', lineData: 35 },
+    { XAxisData: 'Apr', lineData: 40 },
+    { XAxisData: 'May', lineData: 45 },
+    { XAxisData: 'Jun', lineData: 50 },
+    { XAxisData: 'Jul', lineData: 55 },
+    { XAxisData: 'Aug', lineData: 53 },
+    { XAxisData: 'Sep', lineData: 48 },
+    { XAxisData: 'Oct', lineData: 42 },
+    { XAxisData: 'Nov', lineData: 36 },
+    { XAxisData: 'Dec', lineData: 32 },
+  ],
+};
 
-const Graphs = () => {
-  const [dataForChart, setDataForChart] = useState([]);
+const ChartManagement = () => {
+  const [listOfChartData, setListOfChartData] = useState([]);
   const [existProducts, setExistProducts] = useState([]);
 
   useEffect(() => {
-    setDataForChart([fakeData]);
+    setListOfChartData([fakeData]);
   }, []);
 
   useEffect(() => {
@@ -62,20 +69,31 @@ const Graphs = () => {
       },
     });
 
-    console.log(dataForNewChart, data);
+    // console.log(dataForNewChart, data);
 
-    const newChartData = createSaleDataToChart(dataForNewChart, data);
+    const newChartData = {
+      info: {
+        chartId: `id_${listOfChartData.length}_${String(new Date())}`,
+        name: 'מכירות',
+        lineTitle: ['S'],
+      },
+      chartData: createSaleDataToChart(dataForNewChart, data),
+    };
 
-    console.log(newChartData);
-    setDataForChart(dataForChart => [...dataForChart, newChartData]);
+    // console.log(newChartData);
+    setListOfChartData(dataForChart => [...dataForChart, newChartData]);
+  };
+
+  const handleDeleteChart = (chartId) => {
+    setListOfChartData(dataForChart => dataForChart.filter(chart => chart.info.chartId !== chartId));
   };
 
   return (
-    <Stack bgcolor={grey[500]}>
+    <Stack>
       <List sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
-        {dataForChart.map((chartData, index) => (
+        {listOfChartData.map((dataForChart, index) => (
           <ListItem key={index} sx={{ width: '50%', height: 500, textAlign: 'center' }}>
-            <TemperatureChart chartData={chartData} />
+            <Charts dataForChart={dataForChart} handleDeleteChart={handleDeleteChart} />
           </ListItem>
         ))}
 
@@ -87,4 +105,4 @@ const Graphs = () => {
   );
 };
 
-export default Graphs;
+export default ChartManagement;

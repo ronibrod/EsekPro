@@ -1,18 +1,21 @@
 import React from 'react';
-import { Container } from '@mui/material';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Stack } from '@mui/material';
 import { grey } from '@mui/material/colors';
-
-import Header from './header';
-import TemperatureChart from './body/Graphs/TemperatureChart'
-import Graphs from './body/Graphs';
+import Body from './Components';
+import DataManagement from './Components/body/DataManagement';
 
 const App = () => {
   return (
-    <Container sx={{ height: '100vh', width: '100%', backgroundColor: grey[100] }}>
-        <Header />
-        
-        <Graphs />
-    </Container>
+    <Stack sx={{ height: '100%', backgroundColor: grey[100] }}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Navigate to="/charts" />} />
+          <Route path="/charts" element={<Body />} />
+          <Route path="/dataManagement" element={<DataManagement />} />
+        </Routes>
+      </BrowserRouter>
+    </Stack>
   );
 };
 
