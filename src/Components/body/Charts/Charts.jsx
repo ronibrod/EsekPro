@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { LineChart, lineElementClasses, markElementClasses } from '@mui/x-charts/LineChart';
 import { PieChart, pieArcLabelClasses } from '@mui/x-charts/PieChart';
+import { BarChart } from '@mui/x-charts/BarChart';
+import { ScatterChart } from '@mui/x-charts/ScatterChart';
 import { Box, IconButton, Paper, ToggleButton, ToggleButtonGroup, Typography, Slider, Stack } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import CloseIcon from '@mui/icons-material/Close';
@@ -21,10 +23,10 @@ const lighterColors = [
 const Charts = ({ dataForChart, handleDeleteChart }) => {
   const { info, chartData } = dataForChart;
 
-  const [chartType, setChartType] = React.useState('line');
+  const [chartType, setChartType] = useState('line');
   const [value, setValue] = useState([0, chartData.length]);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [selectChartType, setSelectChartType] = useState(0);
+  const [selectChartType, setSelectChartType] = useState('line');
   const [showSlider, setShowSlider] = useState(false);
 
   const handleChange = (event, newValue, activeThumb) => {
@@ -47,9 +49,9 @@ const Charts = ({ dataForChart, handleDeleteChart }) => {
     setIsFullScreen(!isFullScreen);
   };
 
-  const toggleSelectChartType = () => {
-    setSelectChartType((selectChartType + 1) % 2);
-  };
+  // const toggleSelectChartType = () => {
+  //   setSelectChartType((selectChartType + 1) % 4);
+  // };
 
   const handleChartType = (event, newChartType) => {
     if (newChartType !== null) {
@@ -61,20 +63,12 @@ const Charts = ({ dataForChart, handleDeleteChart }) => {
     setShowSlider(!showSlider);
   };
 
-  const xLabels = chartData.map(item => item.XAxisData);
-  const lineData = chartData.map(item => item.lineData);
-
-  const displayedXLabels = xLabels.slice(value[0], value[1]);
-  const displayedLineData = lineData.slice(value[0], value[1]);
-
-  const pieData = chartData.map((item, index) => ({
-    id: String(item.XAxisData),
-    value: item.lineData,
-    label: String(item.XAxisData),
+  const pieData = chartData.lineData.map((item, index) => ({
+    id: String(item, index),
+    value: item,
+    label: String(index),
     color: lighterColors[index % lighterColors.length],
   }));
-
-  // console.log(handleDeleteChart());
 
   return (
     <Box
@@ -87,7 +81,7 @@ const Charts = ({ dataForChart, handleDeleteChart }) => {
         position: isFullScreen ? 'fixed' : 'relative',
         top: 0,
         left: 0,
-        zIndex: isFullScreen ? 1300 : 1,
+        zIndex: isFullScreen ? 1000 : 1,
         backgroundColor: isFullScreen ? 'rgba(0, 0, 0, 0.5)' : 'transparent',
       }}
     >
@@ -97,7 +91,9 @@ const Charts = ({ dataForChart, handleDeleteChart }) => {
         padding: 2,
         position: isFullScreen ? 'fixed' : 'relative',
         overflow: 'auto',
-        bgcolor: Colors[0],
+        bgcolor: Colors[10],
+        borderRadius: 2,
+        boxShadow: 5,
       }}>
         <Stack direction='row' justifyContent='space-between' justifyItems='center' alignItems='center'>
           <IconButton color="primary" onClick={() => handleDeleteChart(info.chartId)}>
@@ -116,11 +112,11 @@ const Charts = ({ dataForChart, handleDeleteChart }) => {
         <Stack>
           <Stack dir='ltr'>
             {
-              selectChartType === 0 &&
+              selectChartType === 'line' &&
               <LineChart
                 height={350}
-                series={[{ data: displayedLineData, label: info.lineTitle[0], id: 'lineDataId' }]}
-                xAxis={[{ scaleType: 'point', data: displayedXLabels }]}
+                series={[{ data: chartData.lineData, label: info.lineTitle[0], id: 'lineDataId' }]}
+                xAxis={[{ scaleType: 'point', data: chartData.XAxisData }]}
                 grid={{ vertical: true, horizontal: true }}
                 sx={{
                   [`.${lineElementClasses.root}`]: { strokeWidth: 1 },
@@ -131,7 +127,7 @@ const Charts = ({ dataForChart, handleDeleteChart }) => {
             }
 
             {
-              selectChartType === 1 &&
+              selectChartType === 'pie' &&
               <PieChart
                 height={350}
                 series={[
@@ -155,76 +151,103 @@ const Charts = ({ dataForChart, handleDeleteChart }) => {
                 }}
               />
             }
+
+            {
+              selectChartType === 'bar' &&
+              <BarChart
+                height={350}
+                series={[{ data: chartData.lineData, label: info.lineTitle[0], id: 'barDataId' }]}
+                xAxis={[{ scaleType: 'band', data: chartData.XAxisData }]}
+                grid={{ vertical: true, horizontal: true }}
+                sx={{
+                  '& .MuiBar-root': { strokeWidth: 1 },
+                }}
+              />
+            }
+
+            {
+              selectChartType === 'scatter' &&
+              <ScatterChart
+                height={350}
+                series={[{ data: chartData.lineData.map((d, i) => ({ x: chartData.XAxisData[i], y: d })), label: info.lineTitle[0], id: 'scatterDataId' }]}
+                xAxis={[{ scaleType: 'point', data: chartData.XAxisData }]}
+                grid={{ vertical: true, horizontal: true }}
+                sx={{
+                  '& .MuiScatter-root': { strokeWidth: 1 },
+                }}
+              />
+            }
           </Stack>
 
           <Stack alignItems='start'>
-            <Stack direction="row" width='100%' alignItems="center">
-              <Stack direction="row" width='100%' justifyContent="space-between">
+            <Stack direction="row" width='100%' alignItems="center" display='flex'>
+              <Stack direction="row" width='100%' alignItems="center">
                 <IconButton color="primary" onClick={toggleSlider}>
                   <TuneIcon />
                 </IconButton>
+              </Stack>
 
+              <Stack direction="row" width='100%' justifyContent="center">
                 <Stack dir='ltr'>
                   <ToggleButtonGroup
                     value={chartType}
                     exclusive
                     onChange={handleChartType}
                     aria-label="chart type"
-                  // fullWidth
                   >
                     {['bar', 'line', 'scatter', 'pie'].map((type) => (
-                      <ToggleButton key={type} value={type} width={5} aria-label="left aligned">
+                      <ToggleButton key={type} value={type} width={5} onClick={() => setSelectChartType(type)}>
                         {type}
                       </ToggleButton>
                     ))}
                   </ToggleButtonGroup>
                 </Stack>
+              </Stack>
 
-                {
+              {/* {
                   <IconButton color="primary" onClick={toggleSelectChartType}>
                     <SelectChartIcon />
                   </IconButton>
-                }
-              </Stack>
+                } */}
             </Stack>
-
-            {
-              showSlider && (
-                <Slider
-                  value={value}
-                  onChange={handleChange}
-                  valueLabelDisplay="auto"
-                  min={0}
-                  max={chartData.length}
-                  sx={{
-                    mx: 'auto',
-                    height: 2,
-                    width: '70%',
-                    color: grey[700],
-                    '& .MuiSlider-thumb': {
-                      width: 4,
-                      height: 16,
-                      borderRadius: 0, // square shape
-                      backgroundColor: grey[500],
-                    },
-                    '& .MuiSlider-track': {
-                      backgroundColor: grey[900],
-                    },
-                    '& .MuiSlider-rail': {
-                      backgroundColor: grey[700],
-                    },
-                    '& .MuiSlider-valueLabel': {
-                      backgroundColor: grey[700],
-                      color: 'white',
-                    },
-                  }}
-                />
-              )
-            }
           </Stack>
+
+          {
+            showSlider && (
+              <Slider
+                value={value}
+                onChange={handleChange}
+                valueLabelDisplay="auto"
+                min={0}
+                max={chartData.length}
+                sx={{
+                  mx: 'auto',
+                  height: 2,
+                  width: '70%',
+                  color: grey[700],
+                  '& .MuiSlider-thumb': {
+                    width: 4,
+                    height: 16,
+                    borderRadius: 0,
+                    backgroundColor: grey[500],
+                  },
+                  '& .MuiSlider-track': {
+                    backgroundColor: grey[900],
+                  },
+                  '& .MuiSlider-rail': {
+                    backgroundColor: grey[700],
+                  },
+                  '& .MuiSlider-valueLabel': {
+                    backgroundColor: grey[700],
+                    color: 'white',
+                  },
+                }}
+              />
+            )
+          }
         </Stack>
       </Paper>
-    </Box>
+    </Box >
   );
 };
 

@@ -3,6 +3,9 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  background-color: rgba(255, 255, 255, 0.9); /* שכבת רקע לבנה עם שקיפות */
+  border-radius: 10px; /* גבולות מעוגלים */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* הוספת צל */
 }
 
 .logo {
@@ -11,9 +14,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
