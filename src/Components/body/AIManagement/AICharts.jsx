@@ -281,7 +281,7 @@ const Charts = ({ dataForChart, handleDeleteChart }) => {
         position: isFullScreen ? 'fixed' : 'relative',
         top: 0,
         left: 0,
-        zIndex: isFullScreen ? 1000 : 1,
+        zIndex: isFullScreen ? 1001 : 1,
         backgroundColor: isFullScreen ? 'rgba(0, 0, 0, 0.5)' : 'transparent',
       }}
     >

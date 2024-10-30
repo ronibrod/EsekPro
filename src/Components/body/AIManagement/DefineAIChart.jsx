@@ -22,7 +22,6 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import 'dayjs/locale/he';
 import dayjs from 'dayjs';
-import { XAxis, YAxis } from 'recharts';
 import _range from 'lodash/range';
 import renderFormControl from '../Charts/renderFormControl';
 import Colors from '../../../helpers/colors';
@@ -184,8 +183,8 @@ const DefineChart = ({ onSubmit, existProducts }) => {
           },
         }}
       >
-        <Typography variant='h3' sx={{ mt: 2, color: Colors[7] }}>
-          יצירת גרף AI
+        <Typography variant='h3' sx={{ mt: 2, color: Colors[13] }}>
+          {'יצירת גרף סטטיסטיקה'}
         </Typography>
 
         {
