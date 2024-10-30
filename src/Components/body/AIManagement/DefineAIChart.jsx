@@ -184,8 +184,8 @@ const DefineChart = ({ onSubmit, existProducts }) => {
           },
         }}
       >
-        <Typography variant='h3' sx={{ mt: 2, color: Colors[7] }}>
-          יצירת גרף AI
+        <Typography variant='h3' sx={{ mt: 2, color: Colors[13] }}>
+          {'יצירת גרף סטטיסטיקה'}
         </Typography>
 
         {

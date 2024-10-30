@@ -8,7 +8,7 @@ import DefineChart from './DefineChart';
 import Colors from '../../../helpers/colors';
 import './styles.css';
 
-const backEndUrl = import.meta.env.VITE_API_URL_BACK_END_URL;
+const EsekDBUrl = import.meta.env.VITE_API_URL_ESEK_DB;
 const userName = 'lizCafeteria';
 
 const ChartManagement = () => {
@@ -18,7 +18,7 @@ const ChartManagement = () => {
   useEffect(() => {
     const getProductsAndCategories = async (userName) => {
       try {
-        const { data } = await Axios.get(`${backEndUrl}/getAllProducts`, {
+        const { data } = await Axios.get(`${EsekDBUrl}/getAllProducts`, {
           params: {
             query: JSON.stringify({ userName }),
           },
@@ -34,7 +34,7 @@ const ChartManagement = () => {
 
   const handleAddChart = async (dataForNewChart) => {
     try {
-      const { data } = await Axios.get(`${backEndUrl}/getSales`, {
+      const { data } = await Axios.get(`${EsekDBUrl}/getSales`, {
         params: {
           query: JSON.stringify(dataForNewChart),
         },

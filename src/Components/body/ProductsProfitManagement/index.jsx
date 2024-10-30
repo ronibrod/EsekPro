@@ -4,8 +4,8 @@ import { Autocomplete, Button, Stack, List, ListItem, Paper, TextField, Typograp
 import AddIcon from '@mui/icons-material/Add';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import Colors from '../../../helpers/colors';
-import workersFakeData from './workersFakeData';
-import WorkerCard from './WorkerCard';
+import ProfitFakeData from './ProfitFakeData';
+import ProductCard from './ProductCard';
 // import Header from '../../Basic/Header';
 // import Side from '../../Basic/Side';
 // import AICharts from './AICharts';
@@ -17,37 +17,37 @@ const EsekDBUrl = import.meta.env.VITE_API_URL_ESEK_DB
 
 const userName = 'lizCafeteria';
 
-const WorkersManagement = () => {
-  const [listOfWorkers, setListOfWorkers] = useState([]);
-  const [selectedWorker, setSelectedWorker] = useState('');
+const ProductsProfitManagement = () => {
+  const [listOfProducts, setListOfProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState('');
   const [cards, setCards] = useState([]);
 
   useEffect(() => {
-    const getListOfWorkers = async (userName) => {
-      const { data } = await Axios.get(`${EsekDBUrl}/getWorkersNames`, {
-        params: {
-          query: JSON.stringify({ user_name: userName }),
-        },
-      });
+    const getListOfProducts = async (userName) => {
+      // const { data } = await Axios.get(`${EsekDBUrl}/getWorkersNames`, {
+      //   params: {
+      //     query: JSON.stringify({ user_name: userName }),
+      //   },
+      // });
 
-      // const workersFullNames = data.map(worker => worker.full_name);
-      setListOfWorkers(data);
+      const data = ProfitFakeData.products.map(product => product.he);
+      setListOfProducts(data);
     };
 
-    getListOfWorkers(userName);
+    getListOfProducts(userName);
   }, []);
 
-  const handleAddCard = async (workerName) => {
-    if (!workerName) return;
+  const handleAddCard = async (productName) => {
+    if (!productName) return;
 
-    const [worker] = listOfWorkers.filter(worker => worker.full_name === workerName);
-    const { data } = await Axios.get(`${EsekDBUrl}/getWorker`, {
-      params: {
-        query: JSON.stringify({ user_name: userName, worker_id: worker._id }),
-      },
-    });
+    // const [product] = ProfitFakeData.products.filter(product => product.he === productName);
+    // const { data } = await Axios.get(`${EsekDBUrl}/getWorker`, {
+    //   params: {
+    //     query: JSON.stringify({ user_name: userName, worker_id: worker._id }),
+    //   },
+    // });
 
-    // const [newCard] = workersFakeData.filter(worker => worker.full_name === workerName);
+    const [data] = ProfitFakeData.products.filter(product => product.he === productName);
     setCards(cards => [...cards, data]);
   };
 
@@ -60,7 +60,7 @@ const WorkersManagement = () => {
       <List sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
         {cards.map((card, index) => (
           <ListItem key={index} sx={{ width: '50%', height: 500, textAlign: 'center' }}>
-            <WorkerCard dataForCard={card} handleDeleteCard={handleDeleteCard} />
+            <ProductCard dataForCard={card} handleDeleteCard={handleDeleteCard} />
           </ListItem>
         ))}
 
@@ -92,23 +92,23 @@ const WorkersManagement = () => {
           >
             <Stack sx={{ justifyContent: 'center', alignItems: 'center' }}>
               <Typography variant='h3' sx={{ mt: 2, color: Colors[13] }}>
-                {'הצגת נתוני עובד'}
+                {'בחר מוצר'}
               </Typography>
 
               <Stack sx={{ ml: 3, mt: '20%' }}>
                 <Autocomplete
                   disablePortal
-                  options={listOfWorkers.map(worker => worker.full_name)}
-                  getOptionLabel={(option) => option || ""}  // Assuming listOfWorkers is an array of objects with a 'name' field
-                  onChange={(event, newValue) => setSelectedWorker(newValue)}
+                  options={listOfProducts}
+                  getOptionLabel={(option) => option || ""}
+                  onChange={(event, newValue) => setSelectedProduct(newValue)}
                   sx={{
                     width: 200,
                     '& .MuiAutocomplete-endAdornment': {
-                      right: 'unset',  // Reset the default right positioning
-                      left: 0,         // Move to the left
+                      right: 'unset',
+                      left: 0,
                     },
                     '& .MuiAutocomplete-inputRoot': {
-                      paddingLeft: '5px',  // Adjust padding to prevent overlap with the icon
+                      paddingLeft: '5px',
                     },
                   }}
                   renderInput={(params) => (
@@ -127,7 +127,7 @@ const WorkersManagement = () => {
 
               <Stack sx={{ mt: '5%', justifyContent: 'center', alignItems: 'center' }}>
                 <Button
-                  onClick={() => handleAddCard(selectedWorker)}
+                  onClick={() => handleAddCard(selectedProduct)}
                   variant='contained'
                   sx={{
                     height: 100,
@@ -149,4 +149,4 @@ const WorkersManagement = () => {
   );
 };
 
-export default WorkersManagement;
+export default ProductsProfitManagement;
