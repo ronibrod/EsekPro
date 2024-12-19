@@ -2,45 +2,37 @@ import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
+  Chip,
   FormControl,
+  IconButton,
   InputLabel,
+  Grid,
   MenuItem,
+  OutlinedInput,
   Paper,
   Select,
   Stack,
   TextField,
-  Typography,
-  Grid,
-  IconButton
+  Typography
 } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
-import { CalendarToday } from '@mui/icons-material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import 'dayjs/locale/he';
 import dayjs from 'dayjs';
 import _range from 'lodash/range';
+import renderFormControl from '../Charts/renderFormControl';
 import Colors from '../../../helpers/colors';
-import renderFormControl from './renderFormControl';
 
 const subjectMenu = {
   label: 'נושא',
   isMultiple: false,
   listOfOptions: {
-    allProducts: 'כל המוצרים',
+    // allProducts: 'כל המוצרים',
     byProduct: 'לפי מוצר',
     byCategory: 'לפי קטגוריה',
-  },
-};
-
-const XAxisGroupsMenu = {
-  label: 'קבוצות ציר ה - X',
-  isMultiple: false,
-  listOfOptions: {
-    bySequence: 'רצף זמן (כל יום)',
-    byCertain: 'זמן מסויים (רק ימי חמישי)',
-    byPeriod: 'פרק זמן (ימי השבוע)',
   },
 };
 
@@ -50,38 +42,9 @@ const XAxisSequenceTimeMenu = {
   listOfOptions: {
     hourly: 'שעתי',
     daily: 'יומי',
-    weekly: 'שבועי',
+    // weekly: 'שבועי',
     monthly: 'חודשי',
     yearly: 'שנתי',
-  },
-};
-
-const XAxisCertainTimeMenu = {
-  label: 'יחסי זמן ציר ה - X',
-  isMultiple: false,
-  listOfOptions: {
-    hours: 'שעות',
-    days: 'ימים',
-    months: 'חודשים',
-  },
-};
-
-const XAxisPeriodTimeMenu = {
-  label: 'פרק זמן ציר ה - X',
-  isMultiple: true,
-  listOfOptions: {
-    hours: [..._range(1, 24), 0],
-    days: _range(1, 8),
-    months: _range(1, 13),
-  },
-};
-
-const YAxisMenu = {
-  label: 'ציר ה - Y',
-  isMultiple: false,
-  listOfOptions: {
-    amountOfSales: 'כמות מחירות',
-    comparedTo: 'ביחס ל...',
   },
 };
 
@@ -89,6 +52,12 @@ const DefineChart = ({ onSubmit, existProducts }) => {
   const [isAddNewChartOpen, setIsAddNewChartOpen] = useState(false);
   const [categoryMenu, setCategoryMenu] = useState([]);
   const [productMenu, setProductMenu] = useState([]);
+  // const [selectedSubject, setSelectedSubject] = useState('byProduct');
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedXAxisSequenceTime, setSelectedXAxisSequenceTime] = useState('daily');
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [state, setState] = useState({
     selectedSubject: 'allProducts',
     selectedProducts: [],
@@ -97,8 +66,8 @@ const DefineChart = ({ onSubmit, existProducts }) => {
     selectedXAxisSequenceTime: 'daily',
     selectedXAxisCertainTime: 'days',
     selectedXAxisPeriodTime: [],
-    startDate: null,
-    endDate: null,
+    startDate: dayjs('2023-01-01').format('YYYY-MM-DDTHH:mm:ss'), // null
+    endDate: dayjs('2023-01-31').format('YYYY-MM-DDTHH:mm:ss'), // null
     selectedYAxis: 'amountOfSales',
     selectedComparedToSubject: [],
     selectedComparedToProducts: [],
@@ -140,24 +109,11 @@ const DefineChart = ({ onSubmit, existProducts }) => {
       userName: 'coffee_nyc',
       subject: {
         type: state.selectedSubject,
-        ...(state.selectedSubject === 'byProduct' && { products: state.selectedProducts.map(product => product.name) }),
-        ...(state.selectedSubject === 'byCategory' && { categories: state.selectedCategories.map(category => category.name) }),
+        // ...(selectedSubject === 'byProduct' && { product: selectedProduct.name }),
+        // ...(selectedSubject === 'byCategory' && { categories: selectedCategory }),
       },
       XAxis: {
-        type: state.selectedXAxisGroups,
-        ...(state.selectedXAxisGroups === 'bySequence' && { timeDivision: state.selectedXAxisSequenceTime }),
-        ...(['byCertain', 'byPeriod'].includes(state.selectedXAxisGroups) && { timeDivision: state.selectedXAxisCertainTime }),
-        ...(state.selectedXAxisGroups === 'byPeriod' && { relevantPeriod: state.selectedXAxisPeriodTime }),
-      },
-      YAxis: {
-        type: state.selectedYAxis,
-        ...(state.selectedYAxis === 'comparedTo' && {
-          subject: {
-            type: state.selectedComparedToSubject,
-            ...(state.selectedComparedToSubject === 'byProduct' && { products: state.selectedComparedToProducts.map(product => product.name) }),
-            ...(state.selectedComparedToSubject === 'byCategory' && { categories: state.selectedComparedToCategories.map(category => category.name) }),
-          }
-        }),
+        timeDivision: state.selectedXAxisSequenceTime,
       },
       relevantTime: {
         start: state.startDate,
@@ -167,6 +123,22 @@ const DefineChart = ({ onSubmit, existProducts }) => {
 
     onSubmit(dataForNewChart);
     setIsAddNewChartOpen(false);
+  };
+
+  const handleChangeSelectedSubject = (event) => {
+    setSelectedSubject(event.target.value);
+  };
+
+  const handleChangeSelectedProduct = (event) => {
+    setSelectedProduct(event.target.value);
+  };
+
+  const handleChangeSelectedCategory = (event) => {
+    setSelectedCategory(event.target.value);
+  };
+
+  const handleChangeSelectedXAxisSequenceTime = (event) => {
+    setSelectedXAxisSequenceTime(event.target.value);
   };
 
   const handleChange = (field) => (event) => {
@@ -191,7 +163,7 @@ const DefineChart = ({ onSubmit, existProducts }) => {
           width: '100%',
           height: '100%',
           padding: 4,
-          overflowY: 'scroll',
+          overflowY: 'auto',
           bgcolor: `${Colors[10]}AA`,
           borderRadius: 2,
           boxShadow: 5,
@@ -211,28 +183,36 @@ const DefineChart = ({ onSubmit, existProducts }) => {
           },
         }}
       >
-        <Typography variant='h3' sx={{ mb: 2, color: Colors[7] }}>יצירת גרף</Typography>
-        {!isAddNewChartOpen ? (
+        <Typography variant='h3' sx={{ mt: 2, color: Colors[13] }}>
+          {'יצירת גרף סטטיסטיקה'}
+        </Typography>
+
+        {
+          !isAddNewChartOpen &&
           <Stack sx={{ mt: '25%', justifyContent: 'center', alignItems: 'center' }}>
             <Button onClick={() => setIsAddNewChartOpen(true)} variant='contained' sx={{ height: 100, width: 100, borderRadius: '50%', bgcolor: Colors[6], ':hover': { bgcolor: Colors[7] }, transition: 'background-color 0.3s' }}>
               <AddIcon style={{ fontSize: 100 }} />
             </Button>
           </Stack>
-        ) : (
-          <Grid container spacing={2} sx={{ justifyContent: 'center', alignItems: 'center' }}>
-            <Grid item xs={12} mt={-8} display="flex" justifyContent="flex-start">
+        }
+
+        {
+          isAddNewChartOpen &&
+          <Grid container spacing={2} height='80%' sx={{ justifyContent: 'center', alignItems: 'center' }}>
+            <Grid item xs={12} mt={-20} display="flex" justifyContent="flex-start">
               <IconButton onClick={() => setIsAddNewChartOpen(false)}>
                 <CloseIcon sx={{ color: Colors[5] }} />
               </IconButton>
             </Grid>
-            <Grid item xs={12} mt={5} display="flex" justifyContent="center" gap={2} dir="rtl">
+
+            <Grid item xs={12} display="flex" justifyContent="center" gap={2} dir="rtl">
               <DatePicker
                 label="תאריך התחלה"
                 value={dayjs(state.startDate)}
                 onChange={(date) => handleDateChange('startDate')(date.startOf('day'))}
                 referenceDate={dayjs('2023-01-01')}
                 views={['year', 'month', 'day']}
-                slotProps={{ textField: { variant: "filled" }}}
+                slotProps={{ textField: { variant: "filled" } }}
                 sx={{
                   mx: 5,
                   width: 200,
@@ -251,9 +231,9 @@ const DefineChart = ({ onSubmit, existProducts }) => {
                 label="תאריך סיום"
                 value={dayjs(state.endDate)}
                 onChange={(date) => handleDateChange('endDate')(date.endOf('day'))}
-                referenceDate={dayjs('2023-06-30')}
+                referenceDate={dayjs('2023-01-31')}
                 views={['year', 'month', 'day']}
-                slotProps={{ textField: { variant: "filled" }}}
+                slotProps={{ textField: { variant: "filled" } }}
                 sx={{
                   mx: 5,
                   width: 200,
@@ -270,7 +250,8 @@ const DefineChart = ({ onSubmit, existProducts }) => {
                 }}
               />
             </Grid>
-            <Grid item xs={12} md={12} display="flex" justifyContent="center" gap={2}>
+
+            {/* <Grid item xs={12} md={12} display="flex" justifyContent="center" gap={2}>
               <Grid item xs={12} md={6}>
                 {renderFormControl(subjectMenu, state.selectedSubject, handleChange('selectedSubject'))}
               </Grid>
@@ -284,52 +265,19 @@ const DefineChart = ({ onSubmit, existProducts }) => {
                   {renderFormControl(categoryMenu, state.selectedCategories, handleChange('selectedCategories'), true)}
                 </Grid>
               )}
-            </Grid>
-            <Grid item xs={12} md={6}>
-              {renderFormControl(XAxisGroupsMenu, state.selectedXAxisGroups, handleChange('selectedXAxisGroups'))}
-            </Grid>
-            {state.selectedXAxisGroups === 'bySequence' && (
-              <Grid item xs={12} md={6}>
-                {renderFormControl(XAxisSequenceTimeMenu, state.selectedXAxisSequenceTime, handleChange('selectedXAxisSequenceTime'))}
-              </Grid>
-            )}
-            {['byCertain', 'byPeriod'].includes(state.selectedXAxisGroups) && (
-              <Grid item xs={12} md={6}>
-                {renderFormControl(XAxisCertainTimeMenu, state.selectedXAxisCertainTime, handleChange('selectedXAxisCertainTime'))}
-              </Grid>
-            )}
-            {state.selectedXAxisGroups === 'byCertain' && state.selectedXAxisCertainTime.length !== 0 && (
-              <Grid item xs={12} md={6}>
-                {renderFormControl(XAxisPeriodTimeMenu, state.selectedXAxisPeriodTime, handleChange('selectedXAxisPeriodTime'), true)}
-              </Grid>
-            )}
-            <Grid item xs={12} md={6}>
-              {renderFormControl(YAxisMenu, state.selectedYAxis, handleChange('selectedYAxis'))}
-            </Grid>
-            {state.selectedYAxis === 'comparedTo' && (
-              <>
-                <Grid item xs={12} md={6}>
-                  {renderFormControl(subjectMenu, state.selectedComparedToSubject, handleChange('selectedComparedToSubject'), true)}
-                </Grid>
-                {state.selectedComparedToSubject === 'byProduct' && (
-                  <Grid item xs={12} md={6}>
-                    {renderFormControl(productMenu, state.selectedComparedToProducts, handleChange('selectedComparedToProducts'), true)}
-                  </Grid>
-                )}
-                {state.selectedComparedToSubject === 'byCategory' && (
-                  <Grid item xs={12} md={6}>
-                    {renderFormControl(categoryMenu, state.selectedComparedToCategories, handleChange('selectedComparedToCategories'), true)}
-                  </Grid>
-                )}
-              </>
-            )}
-            <Grid item xs={12} display="flex" justifyContent="center">
-              <Button variant='contained' onClick={handleRun} sx={{ mt: 3, bgcolor: Colors[6], ':hover': { bgcolor: Colors[7] }, transition: 'background-color 0.3s', fontWeight: 'bold' }}>
+            </Grid> */}
+
+            {/* <Grid item xs={12} md={6}>
+              {renderFormControl(XAxisSequenceTimeMenu, state.selectedXAxisSequenceTime, handleChange('selectedXAxisSequenceTime'))}
+            </Grid> */}
+
+            <Grid item xs={12} justifyContent="center">
+              <Button variant='contained' onClick={handleRun} sx={{ mt: 2, bgcolor: Colors[6], ':hover': { bgcolor: Colors[7] }, transition: 'background-color 0.3s', fontWeight: 'bold' }}>
                 התחל
               </Button>
             </Grid>
           </Grid>
-        )}
+        }
       </Paper>
     </LocalizationProvider>
   );

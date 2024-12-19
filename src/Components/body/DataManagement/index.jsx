@@ -14,38 +14,30 @@ const DataManagement = () => {
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   return (
-    <Stack dir='rtl'>
-      <Header />
+    <Stack width='100%' height='100%' alignItems='center'>
+      <Stack
+        sx={{
+          mt: 10,
+          height: 300,
+          width: 500,
+          borderRadius: 5,
+          background: Colors[0],
+          border: 2,
+          borderColor: Colors[4],
+          borderStyle: 'dashed',
+          textAlign: 'center',
+          justifyContent: 'center'
+        }}
+        {...getRootProps()}
+      >
+        <input {...getInputProps()} />
+        <Typography variant='h5' color={Colors[9]}>הכנס לכאן קובץ או לחץ לפתיחת תיקיות</Typography>
+      </Stack>
 
-      <Stack flexDirection='row'>
-        <Side />
-
-        <Stack bgcolor={Colors[1]} width='100%' height='100vh' alignItems='center'>
-          <Stack
-            sx={{
-              mt: 10,
-              height: 200,
-              width: 300,
-              borderRadius: 5,
-              background: Colors[2],
-              border: 2,
-              borderColor: Colors[4],
-              borderStyle: 'dashed',
-              textAlign: 'center',
-              justifyContent: 'center'
-            }}
-            {...getRootProps()}
-          >
-            <input {...getInputProps()} />
-            <Typography color={grey[200]}>הכנס לכאן קובץ או לחץ לפתיחת תיקיות</Typography>
-          </Stack>
-
-          <Stack mt={5}>
-            <Button variant='outlined'>
-              <Typography color={grey[200]}>שליחה</Typography>
-            </Button>
-          </Stack>
-        </Stack>
+      <Stack mt={5}>
+        <Button variant='contained' sx={{ mt: 3, bgcolor: Colors[6], ':hover': { bgcolor: Colors[7] }, transition: 'background-color 0.3s', fontWeight: 'bold' }}>
+          <Typography color={Colors[5]}>שליחה</Typography>
+        </Button>
       </Stack>
     </Stack>
   );

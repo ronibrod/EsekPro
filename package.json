@@ -4,29 +4,32 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --config vite.config.dev.js",
     "build": "vite build",
+    "buildProduction": "vite build --mode production",
+    "start": "serve -s dist",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@emotion/react": "^11.11.4",
-    "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.20",
-    "@mui/material": "^5.15.20",
+    "@mui/joy": "^5.0.0-beta.48",
+    "@mui/material": "^5.16.6",
     "@mui/x-charts": "^7.7.1",
-    "@mui/x-date-pickers": "^7.7.0",
+    "@mui/x-data-grid": "^7.14.0",
+    "@mui/x-data-grid-generator": "^7.14.0",
+    "@mui/x-date-pickers": "^7.11.1",
+    "@mui/x-date-pickers-pro": "^7.16.0",
     "axios": "^1.7.2",
     "date-fns": "^3.6.0",
-    "dotenv": "^16.4.5",
+    "dayjs": "^1.11.12",
+    "jotai": "^2.9.1",
     "lodash": "^4.17.21",
-    "material-ui-popup-state": "^5.1.2",
     "react": "^18.2.0",
-    "react-datepicker": "^7.0.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-router-dom": "^6.24.0",
-    "recharts": "^2.12.7"
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",
@@ -35,7 +38,6 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.6",
-    "vite": "^5.2.0"
+    "eslint-plugin-react-refresh": "^0.4.6"
   }
 }
